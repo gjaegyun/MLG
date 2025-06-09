@@ -1,10 +1,11 @@
 'use client'
 
-import { DownArrow } from "@/assets/svg";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { cn } from "@/lib/utils";
 import Chart from "@/components/Chart";
 import DetailTextBox from "@/components/DetailTextBox";
-import { cn } from "@/lib/utils";
-import { useParams } from "next/navigation";
+import { DownArrow } from "@/assets/svg";
 
 const DATA_MAP: Record<string, {
   name: string;
@@ -52,14 +53,36 @@ const DATA_MAP: Record<string, {
 
 export default function DetailGraphPage() {
   const { id } = useParams() as { id: string };
-  const data = DATA_MAP[id];
+  const [dataMap, setDataMap] = useState(DATA_MAP);
 
-  const scrollToElement = (element: string) => {
-    document.querySelector(element)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+  useEffect(() => {
+    const stored = localStorage.getItem('DATA_SINGLE');
+    if (!stored) return;
+
+    try {
+      const newData = JSON.parse(stored);
+      if (
+        newData.name &&
+        Array.isArray(newData.moodToNumber) &&
+        Array.isArray(newData.messages) &&
+        Array.isArray(newData.age)
+      ) {
+        const lastIndex = Math.max(...Object.keys(dataMap).map(Number));
+        const newKey = (lastIndex + 1).toString();
+        setDataMap(prev => ({
+          ...prev,
+          [newKey]: newData,
+        }));
+      }
+    } catch (error) {
+      console.error('localStorage 파싱 에러:', error);
+    }
+  }, []);
+
+  const data = dataMap[id];
 
   const scrollToTextBox = () => {
-    scrollToElement('#textBox');
+    document.querySelector('#textBox')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
@@ -67,13 +90,15 @@ export default function DetailGraphPage() {
       <div className={cn('flex', 'w-full', 'h-[calc(100vh-6rem)]', 'justify-center', 'items-center', 'flex-col')}>
         <div className={cn('flex', 'relative', 'w-full', 'h-full', 'justify-center', 'items-center', 'flex-col')}>
           <div className={cn('flex', 'flex-col', 'w-full', 'items-center', 'justify-center')}>
-            <p className={cn('text-3xl', 'font-bold')}>김재균님의 인생 그래프</p>
+            <p className={cn('text-3xl', 'font-bold')}>{data?.name}님의 인생 그래프</p>
             <div className={cn('flex', 'w-[60rem]', 'flex-col', 'h-[35rem]')}>
-              <Chart
-                moodToNumber={data.moodToNumber}
-                messages={data.messages}
-                age={data.age}
-              />
+              {data && (
+                <Chart
+                  moodToNumber={data.moodToNumber}
+                  messages={data.messages}
+                  age={data.age}
+                />
+              )}
             </div>
             <div onClick={scrollToTextBox} className={cn('absolute', 'bottom-0', 'flex', 'flex-col', 'items-center', 'gap-[0.25rem]', 'cursor-pointer')}>
               <p className={cn('text-md')}>스크롤 해서 텍스트로 보기</p>
@@ -84,11 +109,16 @@ export default function DetailGraphPage() {
           </div>
         </div>
       </div>
-      <DetailTextBox 
-        name={data.name}
-        messages={data.messages}
-        age={data.age}
-      />
+      {data && (
+        <div className={cn('flex', 'w-full', 'h-full', 'justify-center', 'items-center')}>
+
+        <DetailTextBox 
+          name={data.name}
+          messages={data.messages}
+          age={data.age}
+          />
+          </div>
+      )}
     </>
-  )
+  );
 }

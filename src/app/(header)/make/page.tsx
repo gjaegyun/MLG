@@ -14,8 +14,10 @@ import {
 } from "@/components/Select";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/Button";
+import { useRouter } from "next/navigation";
 
 export default function MakePage() {
+  const { push } = useRouter();
   const [name, setName] = useState('');
   const [ageInfoList, setAgeInfoList] = useState(
     Array.from({ length: 5 }, () => ({ age: '', mood: '', info: '' }))
@@ -44,6 +46,19 @@ export default function MakePage() {
     ageInfoList.every(
       (item) => item.age.trim() !== '' && item.mood.trim() !== '' && item.info.trim() !== ''
     );
+
+    const handleSubmit = () => {
+      const newEntry = {
+        name,
+        moodToNumber: ageInfoList.map((item) => item.mood),
+        messages: ageInfoList.map((item) => item.info),
+        age: ageInfoList.map((item) => Number(item.age)),
+      };
+    
+      localStorage.setItem("DATA_SINGLE", JSON.stringify(newEntry));
+    
+      push('/others');
+    };
 
   return (
     <div className={cn('flex', 'w-full', 'h-[calc(100vh-6rem)]', 'mt-[1rem]', 'justify-center', 'items-center', 'flex-col')}>
@@ -121,6 +136,7 @@ export default function MakePage() {
           variant="blue"
           className={cn('w-full')}
           disabled={!isFormValid}
+          onClick={handleSubmit}
         >
           확인
         </Button>
