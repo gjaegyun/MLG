@@ -1,13 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import { Menu, X, Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { googleLogout } from '@react-oauth/google';
-import { useRouter } from 'next/navigation';
-import { removeCookie } from '@/lib/cookie';
 import Logo from '@/assets/images/Logo.png';
 import Image from 'next/image'
+import { useRouter } from 'next/navigation';
 
 interface HeaderProps {
   isAdmin?: boolean
@@ -16,29 +11,16 @@ interface HeaderProps {
 }
 
 const studentNavItems = [
-  { name: "채용공고", href: "/", key: "jobs" },
-  { name: "지원현황", href: "/applications", key: "applications" },
-  { name: "프로필", href: "/profile", key: "profile" },
+  { name: "만들기", href: "/make", key: "make" },
+  { name: "둘러보기", href: "/others", key: "others" },
+  { name: "내 그래프", href: "/my", key: "my" },
 ]
 
-const adminNavItems = [
-  { name: "대시보드", href: "/admin", key: "dashboard" },
-  { name: "학생 관리", href: "/admin/students", key: "students" },
-  { name: "통계", href: "/admin/analytics", key: "analytics" },
-]
+export function Header({ currentPage = "" }: HeaderProps) {
 
-export function Header({ isAdmin = false, currentPage = "" }: HeaderProps) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const router = useRouter();
+  const {push} = useRouter()
 
-  const handleLogout = () => {
-    googleLogout();
-    removeCookie('accessToken');
-    removeCookie('refreshToken');
-    router.push('/login');
-  }
-
-  const navItems = isAdmin ? adminNavItems : studentNavItems
+  const navItems = studentNavItems
 
   const isCurrentPage = (key: string) => {
     return currentPage === key
@@ -59,7 +41,7 @@ export function Header({ isAdmin = false, currentPage = "" }: HeaderProps) {
                   priority
                 />
               </div>
-              <span className="text-xl font-bold text-gray-900">CHUP.today</span>
+              <span className="text-xl font-bold text-gray-900 cursor-pointer" onClick={() => push('/')}>My Life Graph</span>
             </div>
           </div>
 
@@ -76,57 +58,8 @@ export function Header({ isAdmin = false, currentPage = "" }: HeaderProps) {
                 {item.name}
               </a>
             ))}
-
-            {isAdmin && (
-              <Button className="bg-blue-600 hover:bg-blue-700" size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                공고 등록
-              </Button>
-            )}
-
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              로그아웃
-            </Button>
           </nav>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </Button>
-          </div>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <div className="absolute top-16 left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-40">
-            <nav className="flex flex-col space-y-4 py-4">
-              {navItems.map((item) => (
-                <a
-                  key={item.key}
-                  href={item.href}
-                  className={`px-4 py-2 ${
-                    isCurrentPage(item.key) ? "text-gray-900 font-medium" : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  {item.name}
-                </a>
-              ))}
-
-              <div className="px-4">
-                {isAdmin && (
-                  <Button className="bg-blue-600 hover:bg-blue-700 w-full mb-2">
-                    <Plus className="h-4 w-4 mr-2" />
-                    공고 등록
-                  </Button>
-                )}
-                <Button variant="outline" size="sm" className="w-full" onClick={handleLogout}>
-                  로그아웃
-                </Button>
-              </div>
-            </nav>
-          </div>
-        )}
       </div>
     </header>
   )
