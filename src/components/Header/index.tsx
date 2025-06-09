@@ -35,7 +35,7 @@ export function Header({ currentPage = "" }: HeaderProps) {
               <div className="relative w-12 h-12">
                 <Image
                   src={Logo}
-                  alt="CHUP.today Logo"
+                  alt="MLGLOGO"
                   fill
                   style={{ objectFit: 'contain' }}
                   priority
