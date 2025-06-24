@@ -47,17 +47,35 @@ export default function MakePage() {
       (item) => item.age.trim() !== '' && item.mood.trim() !== '' && item.info.trim() !== ''
     );
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
       const newEntry = {
         name,
-        moodToNumber: ageInfoList.map((item) => item.mood),
-        messages: ageInfoList.map((item) => item.info),
-        age: ageInfoList.map((item) => Number(item.age)),
+        graphDto: ageInfoList.map((item) => ({
+          age: Number(item.age),
+          moodIndex: Number(item.mood),
+          content: item.info,
+        })),
       };
+      console.log(newEntry)
     
-      localStorage.setItem("DATA_SINGLE", JSON.stringify(newEntry));
+      try {
+        const response = await fetch("http://158.247.251.66:8081/api/graph", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newEntry),
+        });
     
-      push('/others');
+        if (!response.ok) {
+          throw new Error(`서버 오류: ${response.status}`);
+        }
+    
+        push('/others');
+      } catch (error) {
+        console.error("요청 실패:", error);
+        alert("데이터 전송에 실패했습니다.");
+      }
     };
 
   return (

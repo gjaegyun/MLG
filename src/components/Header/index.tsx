@@ -13,7 +13,7 @@ interface HeaderProps {
 const studentNavItems = [
   { name: "만들기", href: "/make", key: "make" },
   { name: "둘러보기", href: "/others", key: "others" },
-  { name: "내 그래프", href: "/my", key: "my" },
+  { name: "비교하기", href: "/comparision", key: "comparision" },
 ]
 
 export function Header({ currentPage = "" }: HeaderProps) {

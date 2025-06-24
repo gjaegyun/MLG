@@ -4,41 +4,43 @@ import { useEffect, useState } from "react";
 import OtherGraphs from "@/components/OtherGraphs";
 import { cn } from "@/lib/utils";
 
-const baseGraphNames = ["김재균", "엄지성", "김주은"];
+interface Graph {
+  id: number;
+  name: string;
+}
 
 export default function OthersPage() {
-  const [allGraphNames, setAllGraphNames] = useState<string[]>(baseGraphNames);
-  const [isReady, setIsReady] = useState(false);
+  const [allGraphs, setAllGraphs] = useState<Graph[]>([]);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("DATA_SINGLE");
+    const fetchData = async () => {
+      try {
+        const res = await fetch("http://158.247.251.66:8081/api/graph");
+        if (!res.ok) throw new Error("Fetch 실패");
 
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        const name = parsed?.name;
+        const data = await res.json();
+        const graphs: Graph[] = data.graphs ?? [];
 
-        if (typeof name === "string" && name.trim() !== "") {
-          setAllGraphNames((prev) => {
-            if (prev.includes(name)) return prev;
-            return [...prev, name];
-          });
-        }
+        setAllGraphs(graphs);
+      } catch (err) {
+        console.error("데이터 fetch 실패:", err);
       }
-    } catch (err) {
-      console.error("DATA_SINGLE 파싱 실패:", err);
-    } finally {
-      setIsReady(true);
-    }
+    };
+
+    fetchData();
   }, []);
 
-  if (!isReady) return null;
-
   return (
-    <div className={cn("flex", "w-full", "h-[calc(100vh-6rem)]", "justify-center", "items-center", "flex-col")}>
-      <div className={cn("flex", allGraphNames.length > 3 && 'mt-[10rem]', 'flex-wrap', "w-full", "h-full", "justify-center", "items-center", "gap-[1rem]")}>
-        {allGraphNames.map((name, index) => (
-          <OtherGraphs key={name} name={name} id={index} />
+    <div className={cn("flex w-full h-[calc(100vh-6rem)] justify-center items-center flex-col")}>
+      <div
+        className={cn(
+          "flex",
+          allGraphs.length > 3 && "mt-[10rem]",
+          "flex-wrap w-full h-full justify-center items-center gap-[1rem]"
+        )}
+      >
+        {allGraphs.map(({ id, name }) => (
+          <OtherGraphs key={id} name={name} id={id} />
         ))}
       </div>
     </div>

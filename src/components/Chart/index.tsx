@@ -11,19 +11,24 @@ import {
   Tooltip,
 } from 'chart.js';
 
-
 import { useEffect, useRef } from 'react';
 
 interface Props {
   moodToNumber: string[];
   messages: string[];
   age: number[];
+  moodToNumber2?: string[];
+  messages2?: string[];
+  age2?: number[];
 }
 
 const Chart: React.FC<Props> = ({
   moodToNumber,
   messages,
   age,
+  moodToNumber2,
+  messages2,
+  age2,
 }) => {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<ChartJS | null>(null);
@@ -34,33 +39,61 @@ const Chart: React.FC<Props> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    ChartJS.register(
+      LineController,
+      CategoryScale,
+      LinearScale,
+      PointElement,
+      LineElement,
+      Tooltip
+    );
+
+    const destroyChart = () => {
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+        chartInstance.current = null;
+      }
+    };
+
     const createChart = () => {
-      ChartJS.register(
-        LineController,
-        CategoryScale,
-        LinearScale,
-        PointElement,
-        LineElement,
-        Tooltip
-      );
+      const datasets = [
+        {
+          label: '그래프 1',
+          data: moodToNumber.map((value) => parseInt(value, 10)),
+          borderColor: '#FF952B',
+          backgroundColor: '#FF952B',
+          pointRadius: 6,
+          pointBorderWidth: 2,
+          pointBorderColor: '#FFFFFF',
+          pointHoverRadius: 8,
+          pointHoverBorderColor: '#FFFFFF',
+          fill: false,
+        },
+      ];
+
+      // 두 번째 그래프가 존재할 경우 추가
+      if (moodToNumber2 && messages2 && age2) {
+        datasets.push({
+          label: '그래프 2',
+          data: moodToNumber2.map((value) => parseInt(value, 10)),
+          borderColor: '#5B8DEF',
+          backgroundColor: '#5B8DEF',
+          pointRadius: 6,
+          pointBorderWidth: 2,
+          pointBorderColor: '#FFFFFF',
+          pointHoverRadius: 8,
+          pointHoverBorderColor: '#FFFFFF',
+          fill: false,
+        });
+      }
+
+      const labels = age.map((value) => value.toString());
+
       chartInstance.current = new ChartJS(ctx, {
         type: 'line',
         data: {
-          labels: age.map((value) => value.toString()),
-          datasets: [
-            {
-              label: 'Subscriber Number',
-              data: moodToNumber.map((value) => parseInt(value, 10)),
-              borderColor: '#FF952B',
-              backgroundColor: '#FF952B',
-              pointRadius: 6,
-              pointBorderWidth: 2,
-              pointBorderColor: '#FFFFFF',
-              pointHoverRadius: 8,
-              pointHoverBorderColor: '#FFFFFF',
-              fill: false,
-            },
-          ],
+          labels,
+          datasets,
         },
         options: {
           maintainAspectRatio: false,
@@ -70,12 +103,7 @@ const Chart: React.FC<Props> = ({
               display: true,
               grid: {
                 display: true,
-                color: function (context) {
-                  if (context.tick.value > 0) {
-                    return '#474747';
-                  }
-                  return '#FFFFFF';
-                },
+                color: (context) => context.tick.value > 0 ? '#474747' : '#FFFFFF',
                 lineWidth: 1,
               },
             },
@@ -93,12 +121,19 @@ const Chart: React.FC<Props> = ({
           plugins: {
             tooltip: {
               callbacks: {
-                title: () => {
-                  return `기억에 남는 일`;
+                title: (tooltipItems) => {
+                  return '기억에 남는 일';
                 },
                 label: (tooltipItem) => {
-                  const index = tooltipItem.dataIndex;
-                  return `${messages[index]}`;
+                  const datasetIndex = tooltipItem.datasetIndex;
+                  const dataIndex = tooltipItem.dataIndex;
+
+                  if (datasetIndex === 0) {
+                    return messages[dataIndex] ?? '';
+                  } else if (datasetIndex === 1 && messages2) {
+                    return messages2[dataIndex] ?? '';
+                  }
+                  return '';
                 },
               },
               backgroundColor: '#474747',
@@ -123,20 +158,13 @@ const Chart: React.FC<Props> = ({
       });
     };
 
-    const destroyChart = () => {
-      if (chartInstance.current) {
-        chartInstance.current.destroy();
-        chartInstance.current = null;
-      }
-    };
-
     destroyChart();
     createChart();
 
     return () => {
       destroyChart();
     };
-  }, [moodToNumber, messages, age]);
+  }, [moodToNumber, messages, age, moodToNumber2, messages2, age2]);
 
   return (
     <div className={cn('p-[2.25rem]', 'gap-[1.5rem]', 'w-full', 'h-full', 'rounded-xl')}>
