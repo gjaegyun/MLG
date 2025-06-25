@@ -40,7 +40,7 @@ export default function ComparisionPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("https://158.247.251.66:8081/api/graph");
+        const res = await fetch("http://158.247.251.66:8081/api/graph");
         if (!res.ok) throw new Error("Fetch 실패");
 
         const data = await res.json();
@@ -88,7 +88,7 @@ export default function ComparisionPage() {
     try {
       const responses = await Promise.all(
         selectedGraphs.map((id) =>
-          fetch(`https://158.247.251.66:8081/api/graph/${id}`)
+          fetch(`http://158.247.251.66:8081/api/graph/${id}`)
         )
       );
 

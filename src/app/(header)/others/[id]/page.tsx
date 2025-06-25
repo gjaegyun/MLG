@@ -21,7 +21,7 @@ export default function DetailGraphPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(`https://158.247.251.66:8081/api/graph/${id}`);
+        const res = await fetch(`http://158.247.251.66:8081/api/graph/${id}`);
         if (!res.ok) throw new Error("데이터 요청 실패");
 
         const result = await res.json();

@@ -15,7 +15,7 @@ export default function OthersPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("https://158.247.251.66:8081/api/graph");
+        const res = await fetch("http://158.247.251.66:8081/api/graph");
         if (!res.ok) throw new Error("Fetch 실패");
 
         const data = await res.json();
