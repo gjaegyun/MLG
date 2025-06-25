@@ -59,7 +59,7 @@ export default function MakePage() {
       console.log(newEntry)
     
       try {
-        const response = await fetch("http://158.247.251.66:8081/api/graph", {
+        const response = await fetch("https://158.247.251.66:8081/api/graph", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
